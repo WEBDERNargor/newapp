@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FlatList, Pressable, Alert, Image, Text, StyleSheet, ActivityIndicator, View, TextInput, KeyboardAvoidingView, Platform
+  FlatList, Pressable, Alert, Image, Text, StyleSheet, ActivityIndicator, View, TextInput, KeyboardAvoidingView, Platform, SafeAreaView
 } from 'react-native';
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [search, setSearch] = useState("");
 
   const fetchProducts = async () => {
-    if (loading || !hasMore) return; // หยุดการโหลดถ้ากำลังโหลดอยู่หรือไม่มีข้อมูลเพิ่มเติม
+    if (loading || !hasMore) return;
     setLoading(true);
-    const offset = (page - 1) * 8;
+    const offset = (page - 1) * 12;
 
     try {
       const requestOptions = {
         method: 'POST',
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `offset=${offset}&countpage=8`
+        body: `offset=${offset}&countpage=12`
       };
 
       const response = await fetch(`https://shop.nargor.dev/api/async?action=product`, requestOptions);
@@ -32,7 +33,7 @@ const Home = () => {
         setData(prevData => [...prevData, ...json.data]);
         setPage(prevPage => prevPage + 1);
       } else {
-        setHasMore(false); // ไม่มีข้อมูลเพิ่มเติม
+        setHasMore(false);
       }
     } catch (error) {
       console.error(error);
@@ -43,11 +44,12 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchProducts(); // โหลดข้อมูลครั้งแรก
+    fetchProducts();
   }, []);
 
   const onDetail = (id) => {
-    Alert.alert("Product ID", `The product ID is ${id}`);
+    navigation.navigate('Detail', {id})
+    // Alert.alert("Product ID", `The product ID is ${id}`);
   };
 
   const renderItem = ({ item }) => (
@@ -58,29 +60,29 @@ const Home = () => {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.wrapper}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-    >
-      <View style={styles.searchbar}>
-        <TextInput
-          placeholder="ค้าหาสินค้า..."
-          keyboardType="default"
+    <SafeAreaView style={styles.wrapper}>
+      <KeyboardAvoidingView style={styles.wrapper} behavior="none" keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}>
+        <View style={styles.searchbar}>
+          <TextInput
+            style={styles.input}
+            placeholder="Search products..."
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `key-${item.p_id}-${index}`}
+          numColumns={2}
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          onEndReached={fetchProducts}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={() => loading ? <ActivityIndicator size="large" color="#0000ff" /> : null}
         />
-      </View>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => `key-${item.p_id}-${index}`}
-        numColumns={2}
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-        onEndReached={fetchProducts}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={() => loading ? <ActivityIndicator size="large" color="#0000ff" /> : null}
-      />
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -91,11 +93,22 @@ const styles = StyleSheet.create({
     height: '100%'
   },
   searchbar: {
-    flex: 0.10
+    flex:0.07,
+    backgroundColor: 'white', // สีพื้นหลังของแถบค้นหา
+    padding: 10, // ระยะขอบภายใน
+    flexDirection:'row'
+    
+  },
+  input: {
+    height: '100%',
+    backgroundColor: '#F0F0F0', // สีพื้นหลังของช่องใส่ข้อความ
+    borderRadius: 10, // รูปแบบขอบมน
+    paddingLeft: 10, // ระยะห่างด้านซ้ายของข้อความ
+    flex:0.90
   },
   container: {
     backgroundColor: "#F4F5AB",
-    flex: 0.90
+    flex: 0.93
   },
   contentContainer: {
     paddingHorizontal: 10,
