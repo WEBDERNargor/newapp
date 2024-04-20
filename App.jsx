@@ -9,6 +9,7 @@ import Detail from './screens/Detail';
 const Stack = createNativeStackNavigator();
 const App = () => {
   return (
+
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
@@ -21,6 +22,8 @@ const App = () => {
         <Stack.Screen name="Detail" component={Detail} options={{headerShown:false}}  />
       </Stack.Navigator>
     </NavigationContainer>
+    
+  
   );
 }
 export default App

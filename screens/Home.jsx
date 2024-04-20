@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FlatList, Pressable, Alert, Image, Text, StyleSheet, ActivityIndicator, View, TextInput, KeyboardAvoidingView, Platform, SafeAreaView
+  FlatList, Pressable, Alert, Image, Text, StyleSheet, ActivityIndicator, View, TextInput, KeyboardAvoidingView, Platform, SafeAreaView,TouchableOpacity
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Home = ({ navigation }) => {
   const [data, setData] = useState([]);
@@ -51,6 +52,11 @@ const Home = ({ navigation }) => {
     navigation.navigate('Detail', {id})
     // Alert.alert("Product ID", `The product ID is ${id}`);
   };
+  const goback = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  }
 
   const renderItem = ({ item }) => (
     <Pressable style={styles.card} onPress={() => onDetail(item.p_id)}>
@@ -62,7 +68,9 @@ const Home = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.wrapper}>
       <KeyboardAvoidingView style={styles.wrapper} behavior="none" keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}>
+   
         <View style={styles.searchbar}>
+  
           <TextInput
             style={styles.input}
             placeholder="Search products..."
@@ -70,6 +78,7 @@ const Home = ({ navigation }) => {
             onChangeText={setSearch}
           />
         </View>
+      
         <FlatList
           data={data}
           renderItem={renderItem}
@@ -92,6 +101,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%'
   },
+
   searchbar: {
     flex:0.07,
     backgroundColor: 'white', // สีพื้นหลังของแถบค้นหา
@@ -104,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0', // สีพื้นหลังของช่องใส่ข้อความ
     borderRadius: 10, // รูปแบบขอบมน
     paddingLeft: 10, // ระยะห่างด้านซ้ายของข้อความ
-    flex:0.90
+    flex:1
   },
   container: {
     backgroundColor: "#F4F5AB",
